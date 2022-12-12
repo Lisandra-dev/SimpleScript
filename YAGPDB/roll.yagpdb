@@ -1,0 +1,70 @@
+{{$args := ""}}
+{{$stats := 0}}
+
+{{try}}
+	{{$args = parseArgs 0 "" 
+		(carg "string" "statistique")
+		(carg "string" "nom de la statistique ou #commentaire (Optionnel)")
+		(carg "string" "commentaire (Optionnel)")}}
+	{{$stats := or ($args.Get 0) ""}}
+{{catch}}
+	{{$args = parseArgs 0 "" 
+		(carg "int" "statistique")
+		(carg "string" "nom de la statistique ou #commentaire (Optionnel)")
+		(carg "string" "commentaire (Optionnel)")}}
+		{{$stats := or ($args.Get 0) 0}}
+{{end}}
+
+{{$statistiqueArgs := or ($args.Get 1) ""}}
+{{$commentaire := or ($args.Get 2) ""}}
+{{$comments := $commentaire}}
+{{$statistique := $statistiqueArgs}}
+
+{{if (reFind "^#" (toString $stats))}} {{/* -r #commentaire */}}
+	{{$comments = reReplace "^#" (toString $stats) ""}}
+	{{$stats = 0}}
+	{{if ne $statistiqueArgs "" }}
+		{{$comments = joinStr "" $comments " " $statistiqueArgs}}
+		{{$statistique = ""}}
+	{{end}}
+	{{if ne $commentaire "" }}
+		{{$comments = joinStr "" $comments " " $commentaire}}
+		{{$statistique = ""}}
+	{{end}}
+	{{$comments = joinStr "" "\t*" $comments "*\n"}}
+{{else if (reFind "^#" $statistiqueArgs)}} {{/* -r <int> #comments */}}
+	{{$statistique = ""}}
+	{{$comments = reReplace "^#" ($args.Get 1) ""}}
+	{{if ne $commentaire ""}}
+		{{$comments = joinStr "" $comments " " $commentaire}}
+	{{end}}
+	{{$comments = joinStr "" "\n\t*" $comments "*\n"}}
+{{else}}
+	{{if ne $commentaire ""}}
+		{{$comments = joinStr "" "\t*" $comments "*\n"}}
+	{{end}}
+	{{if ne $statistiqueArgs ""}}
+		{{$statistique = joinStr "" " [__" $statistiqueArgs "__]\n" }}
+	{{end}}
+{{end}}
+
+{{$dice := randInt 1 21 }}
+{{$msg := (joinStr "" $comments "```md\n# " $dice "\n Détails : (dé naturel)\n```")}}
+
+{{ if eq $dice 1}}
+	{{$msg = joinStr "" "**Échec critique**" $statistique $msg }}
+	{{sendMessageNoEscape nil (complexMessage "content" $msg "reply" .Message.ID)}}
+{{ else if eq $dice 20 }}
+	{{$msg = joinStr "" "**Réussite critique**" $statistique $msg }}
+	{{sendMessageNoEscape nil (complexMessage "content" $msg "reply" .Message.ID)}}
+{{else}}
+	{{$added := add $dice $stats }}
+	{{$msg := (joinStr ""  $comments "```md\n# " $added "\nDétails (1d20) : [" $dice " + " $stats "]\n```")}}
+	{{if lt $added 20 }}
+		{{$msg = joinStr "" "**Échec**" $statistique $msg }}
+		{{sendMessageNoEscape nil (complexMessage "content" $msg "reply" .Message.ID)}}
+	{{else}}
+		{{$msg = joinStr "" "**Réussite**" $statistique $msg }}
+		{{sendMessageNoEscape nil (complexMessage "content" $msg "reply" .Message.ID)}}
+	{{end}}
+{{end}}

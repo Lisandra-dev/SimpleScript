@@ -1,0 +1,28 @@
+{{$user := .User.ID}}
+{{$args :=  parseArgs 8 "add <Force> <Endurance> <Agilité> <Constitution> <Education> <Intelligence> <Charisme> <Pouvoir> <charname>"
+    (carg "int" "Force")
+    (carg "int" "Endurance")
+    (carg "int" "Agilité")
+    (carg "int" "Constitution")
+    (carg "int" "Education")
+    (carg "int" "Intelligence")
+    (carg "int" "Charisme")
+    (carg "int" "Pouvoir")
+    (carg "string" "Nom du personnage (si DC ou PNJ)")
+}}
+
+{{$pdv := }}
+
+{{$stats := sdict 
+    "Force" ($args.Get 0)
+    "Endurance" ($args.Get 1)
+    "Agilité" ($args.Get 2)
+    "Constitution" ($args.Get 3)
+    "Education" ($args.Get 4)
+    "Intelligence" ($args.Get 5)
+    "Charisme" ($args.Get 6)
+    "Pouvoir" ($args.Get 7)
+    }}
+
+{{$char_id := or (toRune (lower ($args.Get 8))) $user}}
+
