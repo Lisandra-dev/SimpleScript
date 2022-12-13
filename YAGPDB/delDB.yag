@@ -1,0 +1,23 @@
+{{$args := parseArgs 0 "__Syntaxe__: `-del [Personnage secondaire / PNJ (optionnel)] [@Joueur]`"
+    (carg "string" "Personnage secondaire / PNJ (optionnel)")
+    (carg "userid" "Joueur")
+    }}
+
+{{$user := or ($args.Get 1) .User.ID}}
+{{$char_id := $user}}
+{{$char_name := or ($args.Get 1) .User.Mention}}
+{{if $args.IsSet 1}}
+    {{$char_name = (userArg ($args.Get 1)).Mention}}
+{{end}}
+{{if ($args.IsSet 0)}}
+    {{$id_perso := toRune (lower ($args.Get 0))}}
+    {{range $id_perso}}
+		{{$char_id = add $char_id . }}
+	{{end}}
+    {{$char_name = $args.Get 0}}
+{{end}}
+
+{{dbDel $char_id "stats"}}
+
+{{sendMessage nil (joinStr "" $char_name " statistiques supprimés.")}}
+

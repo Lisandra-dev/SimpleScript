@@ -1,5 +1,4 @@
-{{$user := .User.ID}}
-{{$args :=  parseArgs 8 "add <Force> <Endurance> <Agilité> <Constitution> <Education> <Intelligence> <Charisme> <Pouvoir> <charname>"
+{{$args :=  parseArgs 8 "__Syntaxe__ :`create <Force> <Endurance> <Agilité> <Constitution> <Education> <Intelligence> <Charisme> <Pouvoir> (nom du perso si DC ou PNJ) (@joueur) `"
     (carg "int" "Force")
     (carg "int" "Endurance")
     (carg "int" "Agilité")
@@ -9,9 +8,9 @@
     (carg "int" "Charisme")
     (carg "int" "Pouvoir")
     (carg "string" "Nom du personnage (si DC ou PNJ)")
+    (carg "userid" "Joueur (@mention ou ID)")
 }}
-
-{{$pdv := }}
+{{$pdv := add (mult 2 ($args.Get 1)) ($args.Get 0)}}
 
 {{$stats := sdict 
     "Force" ($args.Get 0)
@@ -22,7 +21,26 @@
     "Intelligence" ($args.Get 5)
     "Charisme" ($args.Get 6)
     "Pouvoir" ($args.Get 7)
+    "PDV" $pdv
     }}
+{{$membreID := or ($args.Get 8) .User.ID}}
+{{$char_id := or ($args.Get 9) .User.ID}}
+{{$char_name := .User.Mention}}
+{{if ($args.IsSet 9)}}
+    {{$char_id = (userArg ($args.Get 9)).ID}}
+    {{$char_name = (userArg ($args.Get 9)).Mention}}
+{{end}} 
+{{if ($args.IsSet 8)}}
+    {{$char_id = (userArg ($args.Get 8)).ID}}
+    {{$char_name = (userArg ($args.Get 8)).Mention}}
+    {{$id_perso := toRune (lower ($args.Get 8))}}
+    {{range $id_perso}}
+		{{- $char_id = add $char_id . }}
+	{{- end}}
+    {{$char_name = $args.Get 8}}
+{{end}}
 
-{{$char_id := or (toRune (lower ($args.Get 8))) $user}}
+{{dbSet $char_id "stats" $stats}}
+
+{{sendMessage nil (complexMessage "content" (joinStr "" "Les stats de " $char_name " ont été ajoutées !") "reply" .Message.ID)}}
 

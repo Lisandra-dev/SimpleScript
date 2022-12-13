@@ -1,0 +1,34 @@
+{{$args := parseArgs 0 "__Syntaxe__ : `get (Nom du personnage) <@Joueur>`"
+    (carg "string" "Personnage secondaire / PNJ (optionnel)")
+    (carg "userid" "Joueur (Optionnel)")
+}}
+
+{{$user := or ($args.Get 1) .User.ID}}
+{{$char_id := $user}}
+{{$char_name := or ($args.Get 1) .User.Mention}}
+{{if $args.IsSet 1}}
+    {{$char_name = (userArg ($args.Get 1)).Mention}}
+{{end}}
+{{if ($args.IsSet 0)}}
+    {{$id_perso := toRune (lower ($args.Get 0))}}
+    {{range $id_perso}}
+		{{$char_id = add $char_id . }}
+	{{end}}
+    {{$char_name = $args.Get 0}}
+{{end}}
+
+{{$stats := sdict}}
+{{with (dbGet $char_id "stats" )}}{{$stats = sdict .Value}}{{end}}
+
+{{$stats_msg := joinStr " " "Statistique de " $char_name ":\n"}}
+
+{{if $stats}}
+    {{range $k, $v := $stats}}
+        {{$stats_msg = joinStr "" $stats_msg ":white_small_square:" $k " : " $v "\n"}}
+    {{end}}
+    {{sendMessageNoEscape nil (complexMessage "content" $stats_msg "reply" .Message.ID)}}
+{{else}}
+    {{sendMessageNoEscape nil (complexMessage "content" (joinStr " " "Pas de personnage configuré pour " $char_name) "reply" .Message.ID)}}
+
+{{end}}
+

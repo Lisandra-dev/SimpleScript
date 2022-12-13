@@ -1,0 +1,124 @@
+{{$args := ""}}
+
+{{$args = parseArgs 0 "" 
+	(carg "string" "Statistique | #commentaire (Optionnel)")
+	(carg "string" "Personnage (Optionnel)")
+	(carg "string" "Commentaire (Optionnel)")
+	}}
+
+{{/* -roll #commentaire */}}
+{{/* -roll <stats nom> (Personnage) */}}
+{{/* -roll <stats nom> #<commentaire> */}}
+{{/* -roll <stats nom> <Personnage> <commentaire> */}}
+
+
+{{$statistiqueName := cslice 
+	"Force" 
+	"Endurance" 
+	"Agilité"
+ 	"Constitution"
+	"Education"
+	"Intelligence"
+	"Charisme"
+	"Pouvoir"
+	"PDV"
+}}
+
+{{$args_stats := or ($args.Get 0) ""}}
+{{$args_perso := or ($args.Get 1) ""}}
+{{$args_comments := or ($args.Get 2) ""}}
+
+{{$comments := ""}}
+{{$statistique := ""}}
+{{$char_name := ""}}
+{{$char_id := .User.ID}}
+{{$statistiqueSearching := ""}}
+
+{{if ($args.IsSet 0)}}
+	{{$args_stats = lower $args_stats}}
+	{{range $statistiqueName}}
+		{{if reFind (joinStr "(.*)" (reReplace "é" $args_stats "e") "(.*)") (reReplace "é" (lower .) "e")}}
+			{{$statistique = title .}}
+			{{$statistiqueSearching = .}}
+		{{end}}
+	{{end}}
+{{end}}
+
+{{if (reFind "^#" $args_stats)}} {{/* -r #commentaire */}}
+	{{$comments = reReplace "^#" $args_stats ""}}
+	{{if ne $args_comments "" }} {{/* Commentaire de plusieurs mots */}}
+		{{$comments = joinStr "" $comments " " $args_comments}}
+		{{$statistique = ""}}
+	{{end}}
+	{{if ne $args_perso ""}}
+		{{$comments = joinStr "" $comments " " $args_perso}}
+	{{end}}
+	{{$comments = joinStr "" "\t*" $comments "*\n"}}
+
+{{else if (reFind "^#" $args_perso)}}
+	{{$comments = reReplace "^#" $args_perso ""}}
+	{{if ne $args_comments ""}}
+		{{$comments = joinStr "" $comments " " $args_comments}}
+	{{end}}
+	{{$comments = joinStr "" "\t*" $comments "*\n"}}
+	{{if ne $args_stats ""}}
+		{{$statistique = joinStr "" " [__" $statistique "__]\n"}}
+	{{end}}
+{{else}}
+	{{if ne $args_comments ""}}
+		{{$comments = joinStr "" "\t*" (reReplace "^#" $args_comments "") "*\n"}}
+	{{end}}
+	{{if ne $args_perso ""}}
+		{{$char_name = joinStr "" " (*" $args_perso "*)"}}
+		{{$id_perso := toRune (lower $args_perso)}}
+		{{range $id_perso}}
+			{{$char_id = add $char_id .}}
+		{{end}}
+	{{end}}
+	{{if ne $args_stats ""}}
+		{{$statistique = joinStr "" " [__" $statistique "__]\n"}}
+	{{end}}
+{{end}}
+
+{{$infoPerso := ""}}
+
+{{$char := sdict 
+	"Force" 0
+	"Endurance" 0
+	"Agilité" 0
+	"Constitution" 0
+	"Éducation" 0
+	"Intelligence" 0
+	"Charisme" 0
+	"Pouvoir" 0
+	"PDV" 0}}
+{{if (dbGet $char_id "stats")}}
+	{{$char = (dbGet $char_id "stats").Value}}
+{{else}}
+	{{$infoPerso = joinStr "" "\n**#" (trimSpace (reReplace "[\\*\\(\\)]" $char_name "")) " n'a pas de fiche de personnage.\nValeur par défaut appliqué : 0**"}}
+	{{$char_name = ""}}
+{{end}}
+
+{{$stats := $char.Get $statistiqueSearching}}
+
+{{$dice := randInt 1 21 }}
+{{$msg := (joinStr "" $comments "```md\n# " $dice "\n(dé naturel)\n```" $infoPerso)}}
+
+
+{{ if eq $dice 1}}
+	{{$msg = joinStr "" "**Échec critique**" $char_name $statistique $msg}}
+	{{sendMessageNoEscape nil (complexMessage "content" $msg "reply" .Message.ID)}}
+{{ else if eq $dice 20 }}
+	{{$msg = joinStr "" "**Réussite critique**" $char_name $statistique $msg }}
+	{{sendMessageNoEscape nil (complexMessage "content" $msg "reply" .Message.ID)}}
+{{else}}
+	{{$added := add $dice $stats }}
+	{{$msg := (joinStr ""  $comments "```md\n# " $added "\nDétails (1d20) : [" $dice " + " $stats "]\n```" $infoPerso)}}
+	{{if lt $added 20 }}
+		{{$msg = joinStr "" "**Échec**" $char_name $statistique $msg }}
+		{{sendMessageNoEscape nil (complexMessage "content" $msg "reply" .Message.ID)}}
+	{{else}}
+		{{$msg = joinStr "" "**Réussite**" $char_name $statistique $msg }}
+		{{sendMessageNoEscape nil (complexMessage "content" $msg "reply" .Message.ID)}}
+	{{end}}
+{{end}}
