@@ -31,13 +31,20 @@
     {{$char_name = (userArg ($args.Get 9)).Mention}}
 {{end}} 
 {{if ($args.IsSet 8)}}
-    {{$char_id = (userArg ($args.Get 8)).ID}}
-    {{$char_name = (userArg ($args.Get 8)).Mention}}
-    {{$id_perso := toRune (lower ($args.Get 8))}}
-    {{range $id_perso}}
-		{{- $char_id = add $char_id . }}
-	{{- end}}
-    {{$char_name = $args.Get 8}}
+    {{if ne (toInt ($args.Get 8)) 0 }}
+        {{$char_id = (userArg ($args.Get 8)).ID}}
+        {{$char_name = (userArg ($args.Get 8)).Mention}}
+        {{$id_perso := toRune (lower ($args.Get 8))}}
+        {{range $id_perso}}
+            {{- $char_id = add $char_id . }}
+        {{- end}}
+    {{else}}
+        {{$char_name = $args.Get 8}}
+        {{$id_perso := toRune (lower ($args.Get 8))}}
+        {{range $id_perso}}
+            {{- $char_id = add $char_id . }}
+        {{- end}}
+    {{end}}
 {{end}}
 
 {{dbSet $char_id "stats" $stats}}
