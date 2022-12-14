@@ -79,16 +79,26 @@
 {{$charaDict := sdict "Personnage" $char_name "ID" $char_id }}
 {{$newData := cslice}}
 {{$charaOther := cslice }}
-{{with (dbGet .User.ID "characters")}}
-	{{range .Value}}
+{{if (dbGet $membreID "characters")}}
+	{{range (dbGet $membreID "characters").Value}}
 		{{$val := sdict .}}
 	    {{$newData = $newData.Append $val }}
 	{{end}}
+{{else}}
+    {{$newData = $newData.Append $charaDict }}
+    {{dbSet $membreID "characters" $newData}}
 {{end}}
-{{$charaOther = $newData.Append $charaDict }}
-{{$charaOther}}
-{{dbSet .User.ID "characters" $charaOther}}
-
+{{$alIn := false}}
+{{range $char:= $newData}}
+    {{if (eq ($char.Get "ID") $char_id)}}
+        {{$alIn = true}}
+        {{break}}
+    {{end}}
+{{end}}
+{{if not $alIn}}
+    {{$newData = $newData.Append $charaDict }}
+    {{dbSet $membreID "characters" $newData}}
+{{end}}
 {{dbSet $char_id "stats" $stats}}
 
 {{sendMessage nil (complexMessage "content" (joinStr "" $warning "Les stats de " $char_name " (" $joueur ") ont été ajoutées !") "reply" .Message.ID)}}

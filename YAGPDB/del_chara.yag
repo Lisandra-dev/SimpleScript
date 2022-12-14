@@ -1,17 +1,23 @@
 {{$trigger := .Cmd}}
 {{$moderator := or (hasRoleName "Modérateur") (hasRoleName "Administrateur")}}
-{{$syntax := joinStr "" "__Syntaxe__ : `" $trigger "(Personnage secondaire) (@joueur)`\n Note :\n\t- Les modérateurs peuvent supprimer les personnages des autres joueurs.\n\t- Les autres ne peuvent supprimer que leurs propres personnages"  }}
+{{$syntax := joinStr "" "__Syntaxe__ : `" $trigger "(Personnage secondaire) (@joueur) (--all)`\n Note :\n\t- Les modérateurs peuvent supprimer les personnages des autres joueurs.\n\t- Les autres ne peuvent supprimer que leurs propres personnages\n\t- L'option `--all` supprime tous les personnages assigné à un joueur. Il est possible de l'utiliser aussi par les joueurs, pour supprimer tous ses propres personnages/PNJ/DC."  }}
 {{if (ge (len .CmdArgs) 1)}}
     {{if (eq (index .CmdArgs 0) "--help") }}
         {{sendMessage nil (complexMessage "content" $syntax "reply" .Message.ID)}}
         {{return}}
     {{end}}
 {{end}}
+
 {{$args := parseArgs 0 $syntax
     (carg "string" "Personnage secondaire / PNJ (optionnel)")
-    (carg "userid" "Joueur")
+    (carg "string" "Joueur")
+    (carg "string" "Option --all (optionnel)")
     }}
 {{$warning := ""}}
+
+{{$first := or ($args.Get 0) ""}}
+{{$second := or ($args.Get 1) ""}}
+{{$third := or ($args.Get 2) ""}}
 
 {{$user := or ($args.Get 1) .User.ID}}
 {{$char_id := $user}}
@@ -20,6 +26,7 @@
 {{if and ($args.IsSet 1)}}
     {{if $moderator}}
         {{$char_id = (userArg ($args.Get 1)).ID}}
+        {{$user = $char_id}}
         {{$char_name = (userArg ($args.Get 1)).Mention}}
         {{$joueur = $char_name }}
     {{else}}
@@ -34,6 +41,7 @@
         {{if $moderator}}
             {{$char_id = (userArg ($args.Get 0)).ID}}
             {{$char_name = (userArg ($args.Get 0)).Mention}}
+            {{$user = $char_id}}
             {{$joueur = ""}}
             {{$id_perso := toRune (lower ($args.Get 0))}}
             {{range $id_perso}}
@@ -52,6 +60,32 @@
         {{- end}}
     {{end}}
 {{end}}
+
+
+{{if or (eq $third "--all") (eq $first "--all") (eq $second "--all") }}
+    {{$newData := cslice}}
+    {{if (dbGet $user "stats")}}
+        {{dbDel $user "stats"}}
+    {{end}}
+    {{if (dbGet $user "characters")}}
+        {{range (dbGet $user "characters").Value}}
+            {{$val := sdict .}}
+            {{$newData = $newData.Append $val }}
+        {{end}}
+        {{range $id := $newData}}
+            {{dbDel ($id.Get "ID") "stats"}}
+        {{end}}
+        {{dbDel $user "characters"}}
+        {{$msg := joinStr "" "Tous les personnages de <@" $user "> ont été supprimés."}}
+        {{sendMessage nil (complexMessage "content" $msg "reply" .Message.ID)}}
+        {{return}}
+    {{else}}
+        {{$msg := "Aucun personnage trouvé pour ce joueur."}}
+        {{sendMessage nil (complexMessage "content" $msg "reply" .Message.ID)}}
+        {{return}}
+    {{end}}
+{{end}}
+
 {{$msg := joinStr "" "Le personnage de " $char_name  " (" $joueur ") est introuvable"}}
 {{if dbGet $char_id "stats"}}
     {{dbDel $char_id "stats"}}

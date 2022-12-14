@@ -16,13 +16,19 @@
 {{$char_name := or ($args.Get 1) .User.Mention}}
 {{if $args.IsSet 1}}
     {{$char_name = (userArg ($args.Get 1)).Mention}}
+    {{$char_id = (userArg ($args.Get 1)).ID}}
 {{end}}
 {{if ($args.IsSet 0)}}
-    {{$id_perso := toRune (lower ($args.Get 0))}}
-    {{range $id_perso}}
-		{{$char_id = add $char_id . }}
-	{{end}}
-    {{$char_name = $args.Get 0}}
+    {{if ne (toInt (userArg ($args.Get 0)).ID) 0}}
+        {{$char_id = (userArg ($args.Get 0)).ID}}
+        {{$char_name = (userArg ($args.Get 0)).Mention}}
+    {{else}}
+        {{$id_perso := toRune (lower ($args.Get 0))}}
+        {{range $id_perso}}
+            {{$char_id = add $char_id . }}
+        {{end}}
+        {{$char_name = $args.Get 0}}
+    {{end}}
 {{end}}
 
 {{$stats := sdict}}
@@ -37,6 +43,5 @@
     {{sendMessageNoEscape nil (complexMessage "content" $stats_msg "reply" .Message.ID)}}
 {{else}}
     {{sendMessageNoEscape nil (complexMessage "content" (joinStr " " "Pas de personnage configuré pour " $char_name) "reply" .Message.ID)}}
-
 {{end}}
 

@@ -1,0 +1,12 @@
+{{$newData := cslice}}
+{{if (dbGet .User.ID "characters")}}
+	{{range (dbGet .User.ID "characters").Value}}
+		{{$val := sdict .}}
+	    {{$newData = $newData.Append $val }}
+	{{end}}
+    {{range $id := $newData}}
+        {{dbDel ($id.Get "ID") "stats"}}
+    {{end}}
+{{end}}
+{{dbDel .User.ID "stats"}}
+
