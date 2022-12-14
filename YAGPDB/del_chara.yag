@@ -1,0 +1,56 @@
+{{$trigger := .Cmd}}
+{{$moderator := or (hasRoleName "Modérateur") (hasRoleName "Administrateur")}}
+
+{{$syntax := joinStr "" "Les modérateurs peuvent supprimer les personnages des autres joueurs. Les autres ne peuvent supprimer que leurs propres personnages\n__Syntaxe__ : `" $trigger "(Personnage secondaire) (@joueur)"  }}
+
+{{$args := parseArgs 0 $syntax
+    (carg "string" "Personnage secondaire / PNJ (optionnel)")
+    (carg "userid" "Joueur")
+    }}
+{{$warning := ""}}
+
+{{$user := or ($args.Get 1) .User.ID}}
+{{$char_id := $user}}
+{{$char_name := or ($args.Get 1) .User.Mention}}
+{{$joueur := .User.Mention}}
+{{if and ($args.IsSet 1)}}
+    {{if $moderator}}
+        {{$char_id = (userArg ($args.Get 1)).ID}}
+        {{$char_name = (userArg ($args.Get 1)).Mention}}
+        {{$joueur = $char_name }}
+    {{else}}
+        {{$warning = "Vous n'avez pas les droits pour modifier ou créer les stats d'un autre joueur.\n"}}
+        {{sendMessage nil (complexMessage "content" $warning "reply" .Message.ID)}}
+        {{return}}
+    {{end}}
+{{end}}
+
+{{if ($args.IsSet 0)}}
+    {{if (ne (toInt (userArg ($args.Get 0)).ID) 0)}}
+        {{if $moderator}}
+            {{$char_id = (userArg ($args.Get 0)).ID}}
+            {{$char_name = (userArg ($args.Get 0)).Mention}}
+            {{$joueur = ""}}
+            {{$id_perso := toRune (lower ($args.Get 0))}}
+            {{range $id_perso}}
+                {{- $char_id = add $char_id . }}
+            {{- end}}
+        {{else}}
+            {{$warning = "Vous n'avez pas les droits pour modifier ou créer les stats d'un autre joueur.\n"}}
+            {{sendMessage nil (complexMessage "content" $warning "reply" .Message.ID)}}
+            {{return}}
+        {{end}}
+    {{else}}
+        {{$char_name = $args.Get 0}}
+        {{$id_perso := toRune (lower ($args.Get 0))}}
+        {{range $id_perso}}
+            {{- $char_id = add $char_id . }}
+        {{- end}}
+    {{end}}
+{{end}}
+{{$msg := joinStr "" "Le personnage de " $char_name  " (" $joueur ") est introuvable"}}
+{{if dbGet $char_id "stats"}}
+    {{dbDel $char_id "stats"}}
+    {{$msg = joinStr "" $char_name " statistiques supprimés."}}
+{{end}}
+{{sendMessage nil (complexMessage "content" $msg "reply" .Message.ID)}}

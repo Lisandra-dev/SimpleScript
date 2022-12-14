@@ -1,4 +1,6 @@
-{{$args := parseArgs 0 "__Syntaxe__ : `get (Nom du personnage) <@Joueur>`"
+{{$trigger := .Cmd}}
+{{$syntax := (joinStr "" "__Syntaxe__ : `" $trigger " (nom du personnage) (@joueur)\n Les arguments entre parenthèses sont optionnels. Par défaut, donne les statistiques du personnage principal du joueur qui a lancé la commande.")}}
+{{$args := parseArgs 0 $syntax
     (carg "string" "Personnage secondaire / PNJ (optionnel)")
     (carg "userid" "Joueur (Optionnel)")
 }}

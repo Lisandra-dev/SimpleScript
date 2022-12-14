@@ -31,24 +31,33 @@
 {{$char_name := .User.Mention}}
 {{$joueur := .User.Mention}}
 {{$warning:=""}}
-{{if and ($args.IsSet 9) $moderator}}
-    {{$char_id = (userArg ($args.Get 9)).ID}}
-    {{$char_name = (userArg ($args.Get 9)).Mention}}
-    {{$joueur = (userArg ($args.Get 9)).Mention }}
-{{end}}
-
-{{if ($args.IsSet 8)}}
-    {{if and (ne (toInt ($args.Get 8)) 0) $moderator}}
-        {{$char_id = (userArg ($args.Get 8)).ID}}
-        {{$char_name = (userArg ($args.Get 8)).Mention}}
-        {{$id_perso := toRune (lower ($args.Get 8))}}
-        {{range $id_perso}}
-            {{- $char_id = add $char_id . }}
-        {{- end}}
-    {{else if not $moderator}}
+{{if and ($args.IsSet 9)}}
+    {{if $moderator}}
+        {{$char_id = (userArg ($args.Get 9)).ID}}
+        {{$char_name = (userArg ($args.Get 9)).Mention}}
+        {{$joueur = $char_name }}
+    {{else}}
         {{$warning = "Vous n'avez pas les droits pour modifier ou créer les stats d'un autre joueur.\n"}}
         {{sendMessage nil (complexMessage "content" $warning "reply" .Message.ID)}}
         {{return}}
+    {{end}}
+{{end}}
+
+{{if ($args.IsSet 8)}}
+    {{if and (ne (toInt (userArg ($args.Get 8)).ID) 0)}}
+        {{if $moderator}}
+            {{$char_id = (userArg ($args.Get 8)).ID}}
+            {{$char_name = (userArg ($args.Get 8)).Mention}}
+            {{$joueur = ""}}
+            {{$id_perso := toRune (lower ($args.Get 8))}}
+            {{range $id_perso}}
+                {{- $char_id = add $char_id . }}
+            {{- end}}
+        {{else}}
+            {{$warning = "Vous n'avez pas les droits pour modifier ou créer les stats d'un autre joueur.\n"}}
+            {{sendMessage nil (complexMessage "content" $warning "reply" .Message.ID)}}
+            {{return}}
+        {{end}}
     {{else}}
         {{$char_name = $args.Get 8}}
         {{$id_perso := toRune (lower ($args.Get 8))}}
