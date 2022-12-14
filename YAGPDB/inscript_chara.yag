@@ -1,4 +1,7 @@
-{{$args :=  parseArgs 8 "__Syntaxe__ :`create <Force> <Endurance> <Agilité> <Constitution> <Education> <Intelligence> <Charisme> <Pouvoir> (nom du perso si DC ou PNJ) (@joueur) `"
+{{$trigger := .Cmd}}
+{{$moderator := or (hasRoleName "Modérateur") (hasRoleName "Administrateur")}}
+{{$help := joinStr "" "__Syntaxe__ : `" $trigger " <Force> <Endurance> <Agilité> <Constitution> <Education> <Intelligence> <Charisme> <Pouvoir> (nom du perso si DC ou PNJ) (@joueur)`\n__Note__ : Les arguments entre parenthèses sont optionnels, et peuvent être utilisé indépendemment.\n__Exemples__:\n\t- `" $trigger " 10 10 10 10 10 10 10 10 @Joueur : Permet de mettre des stats à un autre joueur que soit-même`\n\t- `" $trigger " 10 10 10 10 10 10 10 10 Nom du perso`: Permet de mettre des stats à un PNJ/DC qui nous appartient\n\t- `" $trigger " 10 10 10 10 10 10 10 10 Nom du perso @Joueur`: Met des stats à un PNJ/DC d'un autre joueur"}}
+{{$args :=  parseArgs 8 $help
     (carg "int" "Force")
     (carg "int" "Endurance")
     (carg "int" "Agilité")
@@ -26,12 +29,12 @@
 {{$membreID := or ($args.Get 8) .User.ID}}
 {{$char_id := or ($args.Get 9) .User.ID}}
 {{$char_name := .User.Mention}}
-{{if ($args.IsSet 9)}}
+{{if and ($args.IsSet 9) $moderator}}
     {{$char_id = (userArg ($args.Get 9)).ID}}
     {{$char_name = (userArg ($args.Get 9)).Mention}}
 {{end}} 
 {{if ($args.IsSet 8)}}
-    {{if ne (toInt ($args.Get 8)) 0 }}
+    {{if and (ne (toInt ($args.Get 8)) 0) }}
         {{$char_id = (userArg ($args.Get 8)).ID}}
         {{$char_name = (userArg ($args.Get 8)).Mention}}
         {{$id_perso := toRune (lower ($args.Get 8))}}
