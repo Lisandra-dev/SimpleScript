@@ -29,18 +29,26 @@
 {{$membreID := or ($args.Get 8) .User.ID}}
 {{$char_id := or ($args.Get 9) .User.ID}}
 {{$char_name := .User.Mention}}
+{{$joueur := .User.Mention}}
+{{$warning:=""}}
 {{if and ($args.IsSet 9) $moderator}}
     {{$char_id = (userArg ($args.Get 9)).ID}}
     {{$char_name = (userArg ($args.Get 9)).Mention}}
-{{end}} 
+    {{$joueur = (userArg ($args.Get 9)).Mention }}
+{{end}}
+
 {{if ($args.IsSet 8)}}
-    {{if and (ne (toInt ($args.Get 8)) 0) }}
+    {{if and (ne (toInt ($args.Get 8)) 0) $moderator}}
         {{$char_id = (userArg ($args.Get 8)).ID}}
         {{$char_name = (userArg ($args.Get 8)).Mention}}
         {{$id_perso := toRune (lower ($args.Get 8))}}
         {{range $id_perso}}
             {{- $char_id = add $char_id . }}
         {{- end}}
+    {{else if not $moderator}}
+        {{$warning = "Vous n'avez pas les droits pour modifier ou créer les stats d'un autre joueur.\n"}}
+        {{sendMessage nil (complexMessage "content" $warning "reply" .Message.ID)}}
+        {{return}}
     {{else}}
         {{$char_name = $args.Get 8}}
         {{$id_perso := toRune (lower ($args.Get 8))}}
@@ -52,5 +60,5 @@
 
 {{dbSet $char_id "stats" $stats}}
 
-{{sendMessage nil (complexMessage "content" (joinStr "" "Les stats de " $char_name " ont été ajoutées !") "reply" .Message.ID)}}
+{{sendMessage nil (complexMessage "content" (joinStr "" $warning "Les stats de " $char_name " (" $joueur ") ont été ajoutées !") "reply" .Message.ID)}}
 
