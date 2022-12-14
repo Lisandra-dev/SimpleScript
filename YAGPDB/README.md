@@ -55,7 +55,7 @@ Au besoin, vous pouvez afficher l'aide de la commande avec `-get --help`
 - Les autres peuvent uniquement supprimer leur propre statistique ou celui de leur PNJ/DC.
 - L'option `--all` permet de supprimer tous les personnages d'un joueur. Les modérateurs peuvent supprimer pour un autre joueurs.
 
-> **warning** Il ne faut pas oublier de supprimer les statistiques des personnages supprimés ou des joueurs qui quittent !
+> **attention** Il ne faut pas oublier de supprimer les statistiques des personnages supprimés ou des joueurs qui quittent !
 
 Il est aussi possible de supprimer tous les personnages associés à un jour à l'aide de l'option `--all` :
 
