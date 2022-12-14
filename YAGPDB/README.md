@@ -20,10 +20,10 @@ Syntaxe : `-create <Force> <Endurance> <Agilité> <Constitution> <Education> <In
 - Les arguments entre parentheses sont optionnels, et peuvent être utilisé indépendemment  
 - Seuls les modérateurs peuvent créer des personnages pour d'autres joueurs.   
 
-Exemples:
-    - `-create 10 10 10 10 10 10 10 10 @Joueur` : Permet de mettre des stats à un autre joueur que soit-même  
-    - `-create 10 10 10 10 10 10 10 10 Nom du perso`: Permet de mettre des stats à un PNJ/DC qui nous appartient  
-    - `-create 10 10 10 10 10 10 10 10 Nom du perso @Joueur`: Met des stats à un PNJ/DC d'un autre joueur  
+Exemples:  
+- `-create 10 10 10 10 10 10 10 10 @Joueur` : Permet de mettre des stats à un autre joueur que soit-même    
+- `-create 10 10 10 10 10 10 10 10 Nom du perso`: Permet de mettre des stats à un PNJ/DC qui nous appartient    
+- `-create 10 10 10 10 10 10 10 10 Nom du perso @Joueur`: Met des stats à un PNJ/DC d'un autre joueur   
 
 Cette commande est nécessaire pour utiliser les autres commandes de ce bot.  
 
