@@ -1,8 +1,12 @@
 {{$trigger := .Cmd}}
 {{$moderator := or (hasRoleName "Modérateur") (hasRoleName "Administrateur")}}
-
-{{$syntax := joinStr "" "Les modérateurs peuvent supprimer les personnages des autres joueurs. Les autres ne peuvent supprimer que leurs propres personnages\n__Syntaxe__ : `" $trigger "(Personnage secondaire) (@joueur)"  }}
-
+{{$syntax := joinStr "" "__Syntaxe__ : `" $trigger "(Personnage secondaire) (@joueur)`\n Note :\n\t- Les modérateurs peuvent supprimer les personnages des autres joueurs.\n\t- Les autres ne peuvent supprimer que leurs propres personnages"  }}
+{{if (ge (len .CmdArgs) 1)}}
+    {{if (eq (index .CmdArgs 0) "--help") }}
+        {{sendMessage nil (complexMessage "content" $syntax "reply" .Message.ID)}}
+        {{return}}
+    {{end}}
+{{end}}
 {{$args := parseArgs 0 $syntax
     (carg "string" "Personnage secondaire / PNJ (optionnel)")
     (carg "userid" "Joueur")

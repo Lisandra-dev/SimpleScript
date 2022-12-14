@@ -1,6 +1,12 @@
 {{$trigger := .Cmd}}
 {{$moderator := or (hasRoleName "Modérateur") (hasRoleName "Administrateur")}}
 {{$help := joinStr "" "__Syntaxe__ : `" $trigger " <Force> <Endurance> <Agilité> <Constitution> <Education> <Intelligence> <Charisme> <Pouvoir> (nom du perso si DC ou PNJ) (@joueur)`\n__Note__ : Les arguments entre parenthèses sont optionnels, et peuvent être utilisé indépendemment.\n__Exemples__:\n\t- `" $trigger " 10 10 10 10 10 10 10 10 @Joueur : Permet de mettre des stats à un autre joueur que soit-même`\n\t- `" $trigger " 10 10 10 10 10 10 10 10 Nom du perso`: Permet de mettre des stats à un PNJ/DC qui nous appartient\n\t- `" $trigger " 10 10 10 10 10 10 10 10 Nom du perso @Joueur`: Met des stats à un PNJ/DC d'un autre joueur"}}
+
+{{if (eq (index .CmdArgs 0) "--help" )}}
+    {{sendMessage nil (complexMessage "content" $help "reply" .Message.ID)}}
+    {{return}}
+{{end}}
+
 {{$args :=  parseArgs 8 $help
     (carg "int" "Force")
     (carg "int" "Endurance")
@@ -13,6 +19,7 @@
     (carg "string" "Nom du personnage (si DC ou PNJ)")
     (carg "userid" "Joueur (@mention ou ID)")
 }}
+
 {{$pdv := add (mult 2 ($args.Get 1)) ($args.Get 0)}}
 
 {{$stats := sdict 

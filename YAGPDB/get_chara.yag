@@ -1,10 +1,16 @@
 {{$trigger := .Cmd}}
-{{$syntax := (joinStr "" "__Syntaxe__ : `" $trigger " (nom du personnage) (@joueur)\n Les arguments entre parenthèses sont optionnels. Par défaut, donne les statistiques du personnage principal du joueur qui a lancé la commande.")}}
+{{$syntax := (joinStr "" "__Syntaxe__ : `" $trigger " (nom du personnage) (@joueur)`\n\tLes arguments entre parenthèses sont optionnels. Par défaut, donne les statistiques du personnage principal du joueur qui a lancé la commande.")}}
+{{if (ge (len .CmdArgs) 1)}}
+    {{if (eq (index .CmdArgs 0) "--help") }}
+        {{sendMessage nil (complexMessage "content" $syntax "reply" .Message.ID)}}
+        {{return}}
+    {{end}}
+{{end}}
+
 {{$args := parseArgs 0 $syntax
     (carg "string" "Personnage secondaire / PNJ (optionnel)")
     (carg "userid" "Joueur (Optionnel)")
 }}
-
 {{$user := or ($args.Get 1) .User.ID}}
 {{$char_id := $user}}
 {{$char_name := or ($args.Get 1) .User.Mention}}
