@@ -33,7 +33,7 @@
     "Pouvoir" ($args.Get 7)
     "PDV" $pdv
     }}
-{{$membreID := or ($args.Get 8) .User.ID}}
+{{$membreID := .User.ID}}
 {{$char_id := or ($args.Get 9) .User.ID}}
 {{$char_name := .User.Mention}}
 {{$joueur := .User.Mention}}
@@ -41,6 +41,7 @@
 {{if and ($args.IsSet 9)}}
     {{if $moderator}}
         {{$char_id = (userArg ($args.Get 9)).ID}}
+        {{$membreID = $char_id}}
         {{$char_name = (userArg ($args.Get 9)).Mention}}
         {{$joueur = $char_name }}
     {{else}}
@@ -54,6 +55,7 @@
     {{if and (ne (toInt (userArg ($args.Get 8)).ID) 0)}}
         {{if $moderator}}
             {{$char_id = (userArg ($args.Get 8)).ID}}
+            {{$membreID = $char_id}}
             {{$char_name = (userArg ($args.Get 8)).Mention}}
             {{$joueur = ""}}
             {{$id_perso := toRune (lower ($args.Get 8))}}
@@ -73,6 +75,19 @@
         {{- end}}
     {{end}}
 {{end}}
+
+{{$charaDict := sdict "Personnage" $char_name "ID" $char_id }}
+{{$newData := cslice}}
+{{$charaOther := cslice }}
+{{with (dbGet .User.ID "characters")}}
+	{{range .Value}}
+		{{$val := sdict .}}
+	    {{$newData = $newData.Append $val }}
+	{{end}}
+{{end}}
+{{$charaOther = $newData.Append $charaDict }}
+{{$charaOther}}
+{{dbSet .User.ID "characters" $charaOther}}
 
 {{dbSet $char_id "stats" $stats}}
 
