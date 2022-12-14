@@ -6,12 +6,14 @@ Il suffit de copier coller chaque code dans une nouvelle custom commands, en uti
 
 La commande sera alors utilisable en utilisant le préfixe défini dans le serveur, suivi du nom de la commande; par exemple, si vous avez mis `hello` en trigger, vous devrez utiliser `-hello` pour lancer la commande.
 
-> **Note** Par défaut, le préfixe est `-`. Vous pouvez aussi nommer les commandes comme vous le souhaitez.
+> **Note** 
+> Par défaut, le préfixe est `-`. Vous pouvez aussi nommer les commandes comme vous le souhaitez.
 
 # Inscrire son personnage
 🗒️ -> [Fichier](./inscript_chara.yag)
 
-> **Note** Par défaut le trigger utilisé est `-create`
+> **Note** 
+> Par défaut le trigger utilisé est `-create`
 
 Syntaxe : `-create <Force> <Endurance> <Agilité> <Constitution> <Education> <Intelligence> <Charisme> <Pouvoir> (nom du perso si DC ou PNJ) (@joueur)`
 
@@ -27,12 +29,14 @@ Cette commande est nécessaire pour utiliser les autres commandes de ce bot.
 
 Au besoin, vous pouvez afficher l'aide de la commande avec `-create --help`
 
-> **Note** Pour modifier les stats d'un personnage, il suffit de relancer la commande avec les nouvelles stats.
+> **Note** 
+> Pour modifier les stats d'un personnage, il suffit de relancer la commande avec les nouvelles stats.
 
 # Afficher les stats d'un personnage
 🗒️ -> [Fichier](./show_chara.yag)
 
-> **Note** Par défaut le trigger utilisé est `-get`
+> **Note** 
+> Par défaut le trigger utilisé est `-get`
 
 <u>Syntaxe :</u> `-get (nom du personnage) (@joueur)`
 Les arguments entre parentheses sont optionnels, et peuvent être utilisé indépendemment
@@ -48,14 +52,16 @@ Au besoin, vous pouvez afficher l'aide de la commande avec `-get --help`
 # Supprimer un personnage
 🗒️ -> [Fichier](./del_chara.yag)
 
-> **Note** Par défaut le trigger utilisé est `-del`
+> **Note** 
+> Par défaut le trigger utilisé est `-del`
 
 <u>Syntaxe :</u> `-del (nom du personnage) (@joueur)`
 - Seuls les modérateurs peuvent supprimer les statistiques d'un autre joueur ;
 - Les autres peuvent uniquement supprimer leur propre statistique ou celui de leur PNJ/DC.
 - L'option `--all` permet de supprimer tous les personnages d'un joueur. Les modérateurs peuvent supprimer pour un autre joueurs.
 
-> **attention** Il ne faut pas oublier de supprimer les statistiques des personnages supprimés ou des joueurs qui quittent !
+> **Warning** 
+> Il ne faut pas oublier de supprimer les statistiques des personnages supprimés ou des joueurs qui quittent !
 
 Il est aussi possible de supprimer tous les personnages associés à un jour à l'aide de l'option `--all` :
 
@@ -77,7 +83,8 @@ Le vrai intérêt de toutes ses fonctions : pouvoir lancer des dés sans avoir �
 
 Il y a **beaucoup** d'option possible, mais je vais vous montrer les plus courantes, et les plus simples ;).
 
-> **Note** Par défaut le trigger utilisé est `-roll`
+> **Note** 
+> Par défaut le trigger utilisé est `-roll`
 
 La commande a plusieurs syntaxes mais chaque arguments peut être utilisé dans le désordre **sauf pour la statistique qui doit être en premier**.
 Cette statistique peut être une partie du mot, par exemple : `-roll fo` pour la force.
@@ -102,7 +109,8 @@ Et toutes ses options sont cumulables, par exemple :`-roll <statistique> &<nom d
 
 On notera qu'il n'est pas possible de "combiner" l'option `+` (bonus) et `-` (malus) dans la même commande : vous devez calculer le bonus (ou malus) final.
 
-> **Note** Au besoin, vous pouvez afficher l'aide de la commande avec `-roll --help`
+> **Note** 
+> Au besoin, vous pouvez afficher l'aide de la commande avec `-roll --help`
 
 
 
